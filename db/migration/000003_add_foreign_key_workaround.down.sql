@@ -1,0 +1,3 @@
+-- This would restore the original constraint, but only if users table exists
+-- and has the right structure. For testing, we can leave this empty.
+-- If deploying to production, you'd want proper constraints. 

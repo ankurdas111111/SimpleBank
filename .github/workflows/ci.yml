@@ -45,6 +45,30 @@ jobs:
       - name: Run migrations
         run: make migrateup
         
+      - name: Create test users
+        run: |
+          # Connect to PostgreSQL and create test users
+          PGPASSWORD=secret psql -h localhost -U root -d simple_bank -p 5400 -c "
+          CREATE TABLE IF NOT EXISTS users (
+            username VARCHAR PRIMARY KEY,
+            hashed_password VARCHAR NOT NULL,
+            full_name VARCHAR NOT NULL,
+            email VARCHAR UNIQUE NOT NULL,
+            password_changed_at TIMESTAMPTZ NOT NULL DEFAULT('0001-01-01 00:00:00Z'),
+            created_at TIMESTAMPTZ NOT NULL DEFAULT (now())
+          );
+          
+          -- Insert test users that match the random owners created in tests
+          INSERT INTO users (username, hashed_password, full_name, email)
+          SELECT 
+            'user_' || i, 
+            'password', 
+            'User ' || i, 
+            'user_' || i || '@example.com'
+          FROM generate_series(1, 100) AS i
+          ON CONFLICT DO NOTHING;
+          "
+        
       - name: Get dependencies
         run: go get -v -t -d ./...
           

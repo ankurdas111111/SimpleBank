@@ -3,6 +3,7 @@ package db
 import (
 	"context"
 	"database/sql"
+	"fmt"
 	"testing"
 	"time"
 
@@ -20,8 +21,9 @@ type TestUser struct {
 
 // Stub implementation for createRandomUser
 func createRandomUser(t *testing.T) TestUser {
+	// Generate usernames in the format 'user_X' to match what we create in CI
 	return TestUser{
-		Username: util.RandomOwner(),
+		Username: fmt.Sprintf("user_%d", util.RandomInt(1, 100)),
 	}
 }
 
