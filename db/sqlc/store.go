@@ -6,17 +6,22 @@ import (
 	"fmt"
 )
 
+type Store interface {
+	Querier
+	TransferTx(ctx context.Context, arg TransferTxParams) (TransferTxResult, error)
+}
+
 // Store implements the Repository pattern for database access
 // It uses struct embedding to inherit query methods while adding transaction capabilities
-type Store struct {
+type SQLStore struct {
 	db *sql.DB      // Maintains a single connection pool for DB operations
 	*Queries        // Embeds query methods via composition (preferred over inheritance in Go)
 }
 
 // NewStore constructs a Store instance with dependency injection pattern
 // This follows Go's preference for explicit dependencies over global state
-func NewStore(db *sql.DB) *Store {
-	return &Store{
+func NewStore(db *sql.DB) Store {
+	return &SQLStore{
 		db:      db,
 		Queries: New(db), // Uses constructor pattern rather than direct initialization
 	}
@@ -25,7 +30,7 @@ func NewStore(db *sql.DB) *Store {
 // execTx implements the functional options pattern for transaction execution
 // This higher-order function accepts a function parameter for execution within a tx context
 // (Higher-order functions are a key Go idiom for extending behavior)
-func (store *Store) execTx(ctx context.Context, fn func(*Queries) error) error {
+func (store *SQLStore) execTx(ctx context.Context, fn func(*Queries) error) error {
 	// BeginTx accepts a context for propagating cancellation and deadlines
 	tx, err := store.db.BeginTx(ctx, nil)
 	if err != nil {
@@ -73,7 +78,7 @@ type TransferTxResult struct {
 
 // addAccountsForUpdate demonstrates the multi-value return idiom in Go
 // It returns multiple values with named return parameters, which also initialize the zero value
-func (store *Store) addAccountsForUpdate(ctx context.Context, q *Queries, accountID1, accountID2 int64) (account1, account2 Account, err error) {
+func (store *SQLStore) addAccountsForUpdate(ctx context.Context, q *Queries, accountID1, accountID2 int64) (account1, account2 Account, err error) {
 	// Swap algorithm to ensure consistent lock ordering (deadlock prevention)
 	if accountID1 > accountID2 {
 		accountID1, accountID2 = accountID2, accountID1 // Multiple assignment in a single statement
@@ -91,7 +96,7 @@ func (store *Store) addAccountsForUpdate(ctx context.Context, q *Queries, accoun
 
 // getAccountForUpdate uses direct SQL execution rather than generated queries
 // Demonstrates manual row scanning when auto-generated code isn't sufficient
-func (store *Store) getAccountForUpdate(ctx context.Context, q *Queries, accountID int64) (Account, error) {
+func (store *SQLStore) getAccountForUpdate(ctx context.Context, q *Queries, accountID int64) (Account, error) {
 	// Raw SQL string for custom locking behavior
 	// The FOR UPDATE clause is DB-specific and not abstracted by the query generator
 	query := `SELECT id, owner, balance, currency, created_at FROM accounts
@@ -117,7 +122,7 @@ func (store *Store) getAccountForUpdate(ctx context.Context, q *Queries, account
 
 // TransferTx demonstrates a complete transactional workflow pattern
 // It uses optimistic concurrency control via SQL-level locking
-func (store *Store) TransferTx(ctx context.Context, arg TransferTxParams) (TransferTxResult, error) {
+func (store *SQLStore) TransferTx(ctx context.Context, arg TransferTxParams) (TransferTxResult, error) {
 	var result TransferTxResult
 	
 	// Uses anonymous function as a closure to capture the result variable

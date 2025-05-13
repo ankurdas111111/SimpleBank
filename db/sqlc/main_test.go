@@ -6,20 +6,25 @@ import (
 	"os"
 	"testing"
 
+	"github.com/ankurdas111111/simplebank/util"
 	_ "github.com/lib/pq" // PostgreSQL driver
 )
 
 var testQueries *Queries
 var testDB *sql.DB
-var testStore *Store
+var testStore Store
+
+
 
 // TestMain acts as the setup function for all tests in the package
 func TestMain(m *testing.M) {
-	// Since util.LoadConfig is likely not implemented yet, we'll use a direct connection string
-	connStr := "postgresql://root:secret@localhost:5400/simple_bank?sslmode=disable"
-	
-	var err error
-	testDB, err = sql.Open("postgres", connStr)
+
+	config,err := util.LoadConfig("../..")
+	if err != nil{
+		log.Fatal("Could not connect to db:",err)
+	}
+
+	testDB, err = sql.Open(config.DBdriver, config.DBsource)
 	if err != nil {
 		log.Fatal("cannot connect to db:", err)
 	}
