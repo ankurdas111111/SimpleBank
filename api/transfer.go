@@ -15,7 +15,7 @@ type transferRequest struct{
 	FromAccountID   int64 `json:"from_account_id" binding:"required,min=1"`
 	ToAccountID   	int64 `json:"to_account_id" binding:"required,min=1"`
 	Amount   		int64 `json:"amount" binding:"required,gt=0"`
-	Currency 		string `json:"currency" binding:"required,oneof=USD EUR INR"` // make sure no unnecessary spaces otherwise it will go invalid
+	Currency 		string `json:"currency" binding:"required,currency"` // make sure no unnecessary spaces otherwise it will go invalid
 }
 
 
