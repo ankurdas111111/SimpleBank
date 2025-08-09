@@ -27,9 +27,10 @@ FOR NO KEY UPDATE;
 -- ORDER BY ensures stable pagination even with concurrent modifications
 -- Ordering by primary key is efficient due to clustered index usage
 SELECT * FROM accounts
+WHERE owner = $1
 ORDER BY id
-LIMIT $1
-OFFSET $2;
+LIMIT $2
+OFFSET $3;
 
 -- name: UpdateAccount :one
 -- Single-row UPDATE targeting primary key for efficient index scan
