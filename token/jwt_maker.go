@@ -53,5 +53,13 @@ func (maker *JWTMaker) VerifyToken(token string) (*Payload, error){
 	if !ok{
 		return nil, ErrInvalidToken
 	}
+	
+	// CRITICAL FIX: Add payload validation like PASETO has
+	// This was missing and causing silent failures for expired tokens!
+	err = payload.Valid()
+	if err != nil{
+		return nil, err
+	}
+	
 	return payload, nil
 }
