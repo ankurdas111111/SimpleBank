@@ -13,3 +13,9 @@ INSERT INTO users (
 -- LIMIT 1 optimizes query planning - tells PostgreSQL to stop after first match
 SELECT * FROM users
 WHERE username = $1 LIMIT 1;
+
+-- name: ListUsers :many
+SELECT * FROM users
+ORDER BY username
+LIMIT $1
+OFFSET $2;

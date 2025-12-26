@@ -63,3 +63,12 @@ func (maker *JWTMaker) VerifyToken(token string) (*Payload, error){
 	
 	return payload, nil
 }
+
+// NOTE: We now prefer PASETO for access tokens.
+// The implementation lives in `token/paseto_make.go` as `PasetoMaker`.
+//
+// Example (same Maker interface):
+//
+//   maker, err := NewPasetoMaker(config.TokenSymmetricKey)
+//   token, err := maker.CreateToken(username, duration)
+//   payload, err := maker.VerifyToken(token)

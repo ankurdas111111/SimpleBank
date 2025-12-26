@@ -21,7 +21,10 @@ type Server struct {
 
 // NewServer creates a server and setup routing
 func NewServer(config util.Config, store db.Store) (*Server, error) {
-	tokenMaker, err := token.NewJWTMaker(config.TokenSymmetricKey)
+	// Prefer PASETO (symmetric encryption) for access tokens.
+	// Keep the old JWT code path commented for reference.
+	tokenMaker, err := token.NewPasetoMaker(config.TokenSymmetricKey)
+	// tokenMaker, err := token.NewJWTMaker(config.TokenSymmetricKey)
 	if err != nil{
 		return nil, fmt.Errorf("cannot create token maker: %w", err)
 	}
