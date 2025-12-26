@@ -13,7 +13,7 @@ import (
 
 func main(){
 
-	config,err := util.LoadConfig(".") // . means current folder
+	config,err := util.LoadConfig(".") 
 	if err != nil{
 		log.Fatal("Can not load config:",err)
 	}

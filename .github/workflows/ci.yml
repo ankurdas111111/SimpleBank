@@ -47,10 +47,12 @@ jobs:
         
       - name: Install golang-migrate
         run: |
-          curl -Ls https://github.com/golang-migrate/migrate/releases/download/v4.18.3/migrate.linux-amd64.tar.gz | tar -xz
+          tmpdir="$(mktemp -d)"
+          curl -Ls https://github.com/golang-migrate/migrate/releases/download/v4.18.3/migrate.linux-amd64.tar.gz \
+            | tar -xz -C "$tmpdir"
           # Depending on the release packaging, the extracted binary may be named `migrate`
           # (common) or `migrate.linux-amd64`.
-          if [ -f migrate.linux-amd64 ]; then BIN=migrate.linux-amd64; else BIN=migrate; fi
+          if [ -f "$tmpdir/migrate.linux-amd64" ]; then BIN="$tmpdir/migrate.linux-amd64"; else BIN="$tmpdir/migrate"; fi
           sudo install -m 0755 "$BIN" /usr/local/bin/migrate
           migrate -version
         
@@ -62,8 +64,10 @@ jobs:
           
       - name: Install sqlc
         run: |
-          curl -L https://github.com/kyleconroy/sqlc/releases/download/v1.15.0/sqlc_1.15.0_linux_amd64.tar.gz | tar xvz
-          sudo mv sqlc /usr/bin/sqlc
+          tmpdir="$(mktemp -d)"
+          curl -Ls https://github.com/kyleconroy/sqlc/releases/download/v1.8.0/sqlc_1.8.0_linux_amd64.tar.gz \
+            | tar -xz -C "$tmpdir"
+          sudo install -m 0755 "$tmpdir/sqlc" /usr/local/bin/sqlc
           which sqlc
           
       - name: Install mockgen
