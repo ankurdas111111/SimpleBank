@@ -48,7 +48,10 @@ jobs:
       - name: Install golang-migrate
         run: |
           curl -Ls https://github.com/golang-migrate/migrate/releases/download/v4.18.3/migrate.linux-amd64.tar.gz | tar -xz
-          sudo install -m 0755 migrate.linux-amd64 /usr/local/bin/migrate
+          # Depending on the release packaging, the extracted binary may be named `migrate`
+          # (common) or `migrate.linux-amd64`.
+          if [ -f migrate.linux-amd64 ]; then BIN=migrate.linux-amd64; else BIN=migrate; fi
+          sudo install -m 0755 "$BIN" /usr/local/bin/migrate
           migrate -version
         
       - name: Run migrations
