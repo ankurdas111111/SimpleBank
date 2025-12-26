@@ -1,6 +1,15 @@
 DB_NAME ?= simple_bank
 DB_USER ?= root
+DB_PASSWORD ?= secret
+DB_HOST ?= localhost
+DB_PORT ?= 5400
+DB_SSLMODE ?= disable
 DB_URL ?= postgresql://root:secret@localhost:5400/simple_bank?sslmode=disable
+
+APP_IMAGE ?= simplebank:latest
+APP_CONTAINER ?= simplebank
+APP_PORT ?= 8080
+APP_GIN_MODE ?= release
 
 postgres:  
 	@if docker ps --format '{{.Names}}' | grep -q '^postgres12$$'; then \
@@ -43,5 +52,21 @@ server:
 mock:
 	mockgen -package mockdb -destination db/mock/store.go -build_flags="-mod=mod" github.com/ankurdas111111/simplebank/db/sqlc Store
 
-.PHONY: createdb dropdb postgres migrateup migratedown migrateup1 migratedown1 sqlc test server mock
+docker-build:
+	docker build -t $(APP_IMAGE) .
+
+docker-rm:
+	-docker rm -f $(APP_CONTAINER)
+
+docker-run:
+	docker run -d --name $(APP_CONTAINER) \
+		-p $(APP_PORT):8080 \
+		-e GIN_MODE=$(APP_GIN_MODE) \
+		-e DB_SOURCE="postgresql://$(DB_USER):$(DB_PASSWORD)@$(DB_HOST):$(DB_PORT)/$(DB_NAME)?sslmode=$(DB_SSLMODE)" \
+		$(APP_IMAGE)
+
+docker-logs:
+	docker logs -f $(APP_CONTAINER)
+
+.PHONY: createdb dropdb postgres migrateup migratedown migrateup1 migratedown1 sqlc test server mock docker-build docker-rm docker-run docker-logs
 

@@ -10,6 +10,11 @@ jobs:
   test:
     name: Test
     runs-on: ubuntu-latest
+    env:
+      DB_DRIVER: postgres
+      DB_SOURCE: postgresql://root:secret@localhost:5400/simple_bank?sslmode=disable
+      # Keep migrations aligned with the same CI database
+      DB_URL: postgresql://root:secret@localhost:5400/simple_bank?sslmode=disable
     
     services:
       postgres:
@@ -21,20 +26,19 @@ jobs:
         ports:
           - 5400:5432
         options: >-
-          --health-cmd pg_isready
+          --health-cmd "pg_isready -U root -d simple_bank"
           --health-interval 10s
           --health-timeout 5s
           --health-retries 5
     
     steps:
-      - name: Set up Go 1.x
-        uses: actions/setup-go@v2
-        with:
-          go-version: ^1.24
-        id: go
-        
       - name: Check out code
-        uses: actions/checkout@v2
+        uses: actions/checkout@v4
+
+      - name: Set up Go
+        uses: actions/setup-go@v5
+        with:
+          go-version-file: go.mod
         
       - name: Install PostgreSQL client
         run: |
@@ -43,39 +47,15 @@ jobs:
         
       - name: Install golang-migrate
         run: |
-          curl -L https://github.com/golang-migrate/migrate/releases/download/v4.18.3/migrate.linux-amd64.tar.gz | tar xvz
-          sudo mv migrate /usr/bin/migrate
-          which migrate
+          curl -Ls https://github.com/golang-migrate/migrate/releases/download/v4.18.3/migrate.linux-amd64.tar.gz | tar -xz
+          sudo install -m 0755 migrate.linux-amd64 /usr/local/bin/migrate
+          migrate -version
         
       - name: Run migrations
         run: make migrateup
-        
-      - name: Create test users
-        run: |
-          # Connect to PostgreSQL and create test users
-          PGPASSWORD=secret psql -h localhost -U root -d simple_bank -p 5400 -c "
-          CREATE TABLE IF NOT EXISTS users (
-            username VARCHAR PRIMARY KEY,
-            hashed_password VARCHAR NOT NULL,
-            full_name VARCHAR NOT NULL,
-            email VARCHAR UNIQUE NOT NULL,
-            password_changed_at TIMESTAMPTZ NOT NULL DEFAULT('0001-01-01 00:00:00Z'),
-            created_at TIMESTAMPTZ NOT NULL DEFAULT (now())
-          );
           
-          -- Insert test users that match the random owners created in tests
-          INSERT INTO users (username, hashed_password, full_name, email)
-          SELECT 
-            'user_' || i, 
-            'password', 
-            'User ' || i, 
-            'user_' || i || '@example.com'
-          FROM generate_series(1, 100) AS i
-          ON CONFLICT DO NOTHING;
-          "
-        
-      - name: Get dependencies
-        run: go get -v -t -d ./...
+      - name: Download dependencies
+        run: go mod download
           
       - name: Install sqlc
         run: |
@@ -83,8 +63,17 @@ jobs:
           sudo mv sqlc /usr/bin/sqlc
           which sqlc
           
-      - name: Generate code with sqlc
-        run: make sqlc
+      - name: Install mockgen
+        run: |
+          echo "$(go env GOPATH)/bin" >> "$GITHUB_PATH"
+          go install github.com/golang/mock/mockgen@v1.6.0
+          mockgen -version
+
+      - name: Generate code (sqlc + mocks) and ensure repo is clean
+        run: |
+          make sqlc
+          make mock
+          git diff --exit-code
         
-      - name: Test
-        run: go test -v ./db/sqlc
+      - name: Test (all packages)
+        run: go test -v -cover ./...
