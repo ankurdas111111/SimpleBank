@@ -1,0 +1,91 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>SimpleBank — Dashboard</title>
+    <link rel="stylesheet" href="/styles.css" />
+  </head>
+  <body data-page="dashboard" data-auth="protected">
+    <header class="topbar">
+      <div class="topbar-inner container">
+        <a class="brand" href="/">
+          <div class="brand-mark">SB</div>
+          <div class="brand-text">
+            <div class="brand-name">SimpleBank</div>
+            <div class="brand-sub">Personal Banking</div>
+          </div>
+        </a>
+
+        <nav class="nav">
+          <a class="nav-link active" href="/dashboard.html">Dashboard</a>
+          <a class="nav-link" href="/accounts.html">Accounts</a>
+          <a class="nav-link" href="/transfers.html">Transfers</a>
+        </nav>
+
+        <div class="topbar-actions">
+          <button id="btnLogout" class="btn btn-secondary">Logout</button>
+        </div>
+      </div>
+    </header>
+
+    <main class="container page">
+      <div id="banner" class="banner" hidden></div>
+
+      <section class="hero">
+        <div>
+          <h1 class="h1">Welcome back</h1>
+          <p class="muted">Overview of your accounts and recent activity.</p>
+        </div>
+        <div class="hero-actions">
+          <a class="btn" href="/accounts.html">View accounts</a>
+          <a class="btn btn-secondary" href="/transfers.html">Make a transfer</a>
+        </div>
+      </section>
+
+      <section class="grid-3">
+        <div class="card">
+          <div class="card-label">Total balance</div>
+          <div id="totalBalance" class="metric">$—</div>
+          <div id="totalBreakdown" class="card-hint muted">Across all accounts</div>
+        </div>
+        <div class="card">
+          <div class="card-label">Accounts</div>
+          <div id="accountsCount" class="metric">—</div>
+          <div class="card-hint muted">Active accounts</div>
+        </div>
+        <div class="card">
+          <div class="card-label">Last action</div>
+          <div id="lastAction" class="metric metric-small">—</div>
+          <div class="card-hint muted">Recent activity snapshot</div>
+        </div>
+      </section>
+
+      <section class="card">
+        <div class="card-head">
+          <h2 class="h2">Accounts</h2>
+          <button id="btnRefreshAccounts" class="btn btn-secondary">Refresh</button>
+        </div>
+        <div class="table-wrap">
+          <table class="table">
+            <thead>
+              <tr>
+                <th>ID</th>
+                <th>Currency</th>
+                <th class="right">Balance</th>
+              </tr>
+            </thead>
+            <tbody id="accountsTableBody">
+              <tr><td colspan="3" class="muted">Loading…</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+    </main>
+
+    <div id="toast" class="toast" hidden></div>
+    <script src="/app.js"></script>
+  </body>
+</html>
+
+

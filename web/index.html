@@ -1,0 +1,60 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>SimpleBank — Personal Banking</title>
+    <link rel="stylesheet" href="/styles.css" />
+  </head>
+  <body data-page="landing" data-auth="public">
+    <header class="topbar">
+      <div class="topbar-inner container">
+        <a class="brand" href="/">
+          <div class="brand-mark">SB</div>
+          <div class="brand-text">
+            <div class="brand-name">SimpleBank</div>
+            <div class="brand-sub">Personal Banking</div>
+          </div>
+        </a>
+
+        <nav class="nav">
+          <a class="nav-link" href="/login.html">Sign in</a>
+          <a class="nav-link" href="/signup.html">Open account</a>
+        </nav>
+      </div>
+    </header>
+
+    <main class="container page">
+      <div id="banner" class="banner" hidden></div>
+
+      <section class="hero hero-landing">
+        <div>
+          <h1 class="h1">Banking, simplified.</h1>
+          <p class="muted">
+            Manage accounts and make transfers securely with modern authentication.
+          </p>
+          <div class="hero-actions">
+            <a class="btn" href="/login.html">Sign in</a>
+            <a class="btn btn-secondary" href="/signup.html">Open account</a>
+          </div>
+        </div>
+        <div class="hero-panel card">
+          <div class="card-label">What you can do</div>
+          <ul class="list">
+            <li>View account balances</li>
+            <li>Open accounts in supported currencies</li>
+            <li>Transfer funds between accounts</li>
+          </ul>
+          <div class="muted small">
+            This is a demo UI wired to your API.
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <div id="toast" class="toast" hidden></div>
+    <script src="/app.js"></script>
+  </body>
+</html>
+
+

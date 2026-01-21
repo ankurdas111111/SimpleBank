@@ -1,0 +1,144 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>SimpleBank — Transfers</title>
+    <link rel="stylesheet" href="/styles.css" />
+  </head>
+  <body data-page="transfers" data-auth="protected">
+    <header class="topbar">
+      <div class="topbar-inner container">
+        <a class="brand" href="/dashboard.html">
+          <div class="brand-mark">SB</div>
+          <div class="brand-text">
+            <div class="brand-name">SimpleBank</div>
+            <div class="brand-sub">Personal Banking</div>
+          </div>
+        </a>
+
+        <nav class="nav">
+          <a class="nav-link" href="/dashboard.html">Dashboard</a>
+          <a class="nav-link" href="/accounts.html">Accounts</a>
+          <a class="nav-link active" href="/transfers.html">Transfers</a>
+        </nav>
+
+        <div class="topbar-actions">
+          <button id="btnLogout" class="btn btn-secondary">Logout</button>
+        </div>
+      </div>
+    </header>
+
+    <main class="container page">
+      <div id="banner" class="banner" hidden></div>
+
+      <section class="page-head">
+        <div>
+          <h1 class="h1">Transfers</h1>
+          <p class="muted">Move funds between accounts.</p>
+        </div>
+        <div class="page-actions">
+          <button id="btnRefreshAccounts" class="btn btn-secondary">Refresh accounts</button>
+        </div>
+      </section>
+
+      <section class="grid-2">
+        <div class="card">
+          <div class="card-head">
+            <h2 class="h2">New transfer</h2>
+          </div>
+
+          <form id="transferForm" class="form">
+            <div class="field">
+              <label class="label">Transfer type</label>
+              <div class="segmented" role="tablist" aria-label="Transfer type">
+                <button id="modeSelf" type="button" class="segmented-btn active" aria-selected="true">Self</button>
+                <button id="modeOther" type="button" class="segmented-btn" aria-selected="false">To others</button>
+              </div>
+              <div class="hint muted">Self: between your accounts. To others: to another user's account.</div>
+            </div>
+
+            <div class="field">
+              <label class="label" for="fromAccount">From account</label>
+              <select id="fromAccount" name="from_account_id" required>
+                <option value="">Loading…</option>
+              </select>
+              <div id="fromAccountHint" class="hint muted"></div>
+            </div>
+
+            <div id="selfFields">
+              <div class="field">
+                <label class="label" for="toAccountSelf">To account</label>
+                <select id="toAccountSelf" required>
+                  <option value="">Select an account</option>
+                </select>
+                <div id="toAccountSelfHint" class="hint muted"></div>
+              </div>
+            </div>
+
+            <div id="otherFields" hidden>
+              <div class="field">
+                <label class="label" for="recipientUsername">Recipient username</label>
+                <input id="recipientUsername" name="to_username" autocomplete="off" placeholder="e.g. alice" />
+                <div class="hint muted">Used to validate recipient + account match.</div>
+              </div>
+              <div class="field">
+                <label class="label" for="toAccountId">Recipient account ID</label>
+                <input id="toAccountId" name="to_account_id" type="number" min="1" />
+                <div id="recipientLookup" class="hint muted"></div>
+              </div>
+            </div>
+
+            <div class="field">
+              <label class="label" for="transferAmount">Amount</label>
+              <input id="transferAmount" name="amount" type="number" min="1" required />
+            </div>
+
+            <div class="field">
+              <label class="label" for="transferCurrency">Currency</label>
+              <input id="transferCurrency" name="currency" readonly />
+              <div class="hint muted">Source currency is determined by the “From” account.</div>
+            </div>
+
+            <button class="btn btn-block" type="submit">Review and send</button>
+          </form>
+        </div>
+
+        <div class="card">
+          <div class="card-head">
+            <h2 class="h2">Confirmation</h2>
+          </div>
+          <div id="transferSummary" class="details muted">Fill in the form to see transfer details.</div>
+        </div>
+      </section>
+
+      <section class="card" style="margin-top:16px;">
+        <div class="card-head">
+          <h2 class="h2">Recent transfers</h2>
+          <button id="btnRefreshTransfers" class="btn btn-secondary">Refresh</button>
+        </div>
+        <div class="table-wrap">
+          <table class="table">
+            <thead>
+              <tr>
+                <th>Date (IST)</th>
+                <th>Type</th>
+                <th>From</th>
+                <th>To</th>
+                <th class="right">Amount</th>
+              </tr>
+            </thead>
+            <tbody id="transfersTableBody">
+              <tr><td colspan="5" class="muted">Loading…</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+    </main>
+
+    <div id="toast" class="toast" hidden></div>
+    <script src="/app.js"></script>
+  </body>
+</html>
+
+

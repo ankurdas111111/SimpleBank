@@ -9,6 +9,7 @@ import (
 type Store interface {
 	Querier
 	TransferTx(ctx context.Context, arg TransferTxParams) (TransferTxResult, error)
+	TransferTxFX(ctx context.Context, arg TransferTxFXParams) (TransferTxResult, error)
 }
 
 // Store implements the Repository pattern for database access
@@ -64,6 +65,14 @@ type TransferTxParams struct {
 	FromAccountID int64 `json:"from_account_id"` // Uses lowercase+underscore naming for external representation
 	ToAccountID   int64 `json:"to_account_id"`   // But keeps CamelCase for Go identifiers (idiomatic Go style)
 	Amount        int64 `json:"amount"`          // Uses int64 for precise currency representation (avoid float)
+}
+
+type TransferTxFXParams struct {
+	FromAccountID int64   `json:"from_account_id"`
+	ToAccountID   int64   `json:"to_account_id"`
+	FromAmount    int64   `json:"from_amount"`
+	ToAmount      int64   `json:"to_amount"`
+	Rate          float64 `json:"rate"`
 }
 
 // TransferTxResult uses value semantics for immutable return data
@@ -202,4 +211,78 @@ func (store *SQLStore) TransferTx(ctx context.Context, arg TransferTxParams) (Tr
 	})
 
 	return result, err // Return both result and error to let caller handle errors
+}
+
+// TransferTxFX performs a cross-currency transfer by debiting FromAmount from the
+// source account and crediting ToAmount to the destination account.
+// Transfer.Amount is stored as FromAmount (in the source account currency).
+func (store *SQLStore) TransferTxFX(ctx context.Context, arg TransferTxFXParams) (TransferTxResult, error) {
+	var result TransferTxResult
+
+	err := store.execTx(ctx, func(q *Queries) error {
+		var err error
+
+		result.Transfer, err = q.CreateTransfer(ctx, CreateTransferParams{
+			FromAccountID: arg.FromAccountID,
+			ToAccountID:   arg.ToAccountID,
+			Amount:        arg.FromAmount,
+		})
+		if err != nil {
+			return err
+		}
+
+		result.FromEntry, err = q.CreateEntry(ctx, CreateEntryParams{
+			AccountID: arg.FromAccountID,
+			Amount:    -arg.FromAmount,
+		})
+		if err != nil {
+			return err
+		}
+
+		result.ToEntry, err = q.CreateEntry(ctx, CreateEntryParams{
+			AccountID: arg.ToAccountID,
+			Amount:    arg.ToAmount,
+		})
+		if err != nil {
+			return err
+		}
+
+		if arg.FromAccountID < arg.ToAccountID {
+			result.FromAccount, err = q.UpdateAccountBalance(ctx, UpdateAccountBalanceParams{
+				ID:      arg.FromAccountID,
+				Balance: -arg.FromAmount,
+			})
+			if err != nil {
+				return err
+			}
+
+			result.ToAccount, err = q.UpdateAccountBalance(ctx, UpdateAccountBalanceParams{
+				ID:      arg.ToAccountID,
+				Balance: arg.ToAmount,
+			})
+			if err != nil {
+				return err
+			}
+		} else {
+			result.ToAccount, err = q.UpdateAccountBalance(ctx, UpdateAccountBalanceParams{
+				ID:      arg.ToAccountID,
+				Balance: arg.ToAmount,
+			})
+			if err != nil {
+				return err
+			}
+
+			result.FromAccount, err = q.UpdateAccountBalance(ctx, UpdateAccountBalanceParams{
+				ID:      arg.FromAccountID,
+				Balance: -arg.FromAmount,
+			})
+			if err != nil {
+				return err
+			}
+		}
+
+		return nil
+	})
+
+	return result, err
 }

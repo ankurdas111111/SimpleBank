@@ -1,0 +1,116 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>SimpleBank — Accounts</title>
+    <link rel="stylesheet" href="/styles.css" />
+  </head>
+  <body data-page="accounts" data-auth="protected">
+    <header class="topbar">
+      <div class="topbar-inner container">
+        <a class="brand" href="/dashboard.html">
+          <div class="brand-mark">SB</div>
+          <div class="brand-text">
+            <div class="brand-name">SimpleBank</div>
+            <div class="brand-sub">Personal Banking</div>
+          </div>
+        </a>
+
+        <nav class="nav">
+          <a class="nav-link" href="/dashboard.html">Dashboard</a>
+          <a class="nav-link active" href="/accounts.html">Accounts</a>
+          <a class="nav-link" href="/transfers.html">Transfers</a>
+        </nav>
+
+        <div class="topbar-actions">
+          <button id="btnLogout" class="btn btn-secondary">Logout</button>
+        </div>
+      </div>
+    </header>
+
+    <main class="container page">
+      <div id="banner" class="banner" hidden></div>
+
+      <section class="page-head">
+        <div>
+          <h1 class="h1">Accounts</h1>
+          <p class="muted">View balances and open new accounts.</p>
+        </div>
+        <div class="page-actions">
+          <button id="btnRefreshAccounts" class="btn btn-secondary">Refresh</button>
+        </div>
+      </section>
+
+      <section class="grid-2">
+        <div class="card">
+          <div class="card-head">
+            <h2 class="h2">Your accounts</h2>
+          </div>
+          <div class="table-wrap">
+            <table class="table">
+              <thead>
+                <tr>
+                  <th>ID</th>
+                  <th>Currency</th>
+                  <th class="right">Balance</th>
+                  <th class="right">Actions</th>
+                </tr>
+              </thead>
+              <tbody id="accountsTableBody">
+                <tr><td colspan="4" class="muted">Loading…</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-head">
+            <h2 class="h2">Open a new account</h2>
+          </div>
+          <form id="openAccountForm" class="form">
+            <div class="field">
+              <label class="label" for="open_currency">Currency</label>
+              <select id="open_currency" name="currency" required>
+                <option value="USD">USD</option>
+                <option value="EUR">EUR</option>
+                <option value="INR">INR</option>
+              </select>
+            </div>
+            <button class="btn btn-block" type="submit">Open account</button>
+          </form>
+
+          <div class="divider"></div>
+
+          <div class="card-head">
+            <h2 class="h2">Account details</h2>
+          </div>
+          <div id="accountDetails" class="details muted">Select an account to view details.</div>
+
+          <div class="divider"></div>
+
+          <div class="card-head">
+            <h2 class="h2">Add money</h2>
+          </div>
+          <form id="depositForm" class="form">
+            <div class="field">
+              <label class="label" for="depositAccountId">Account ID</label>
+              <input id="depositAccountId" name="id" type="number" min="1" required />
+              <div class="hint muted">Click “View” on an account to auto-fill.</div>
+            </div>
+            <div class="field">
+              <label class="label" for="depositAmount">Amount</label>
+              <input id="depositAmount" name="amount" type="number" min="1" required />
+            </div>
+            <button class="btn btn-block" type="submit">Add money</button>
+          </form>
+        </div>
+      </section>
+    </main>
+
+    <div id="toast" class="toast" hidden></div>
+    <script src="/app.js"></script>
+  </body>
+</html>
+
+

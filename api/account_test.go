@@ -9,6 +9,7 @@ import (
 	"net/http"
 	"net/http/httptest"
 	"testing"
+	"time"
 
 	mockdb "github.com/ankurdas111111/simplebank/db/mock"
 	db "github.com/ankurdas111111/simplebank/db/sqlc"
@@ -17,12 +18,25 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
+func addAuthorization(
+	t *testing.T,
+	request *http.Request,
+	tokenMaker interface{ CreateToken(username string, duration time.Duration) (string, error) },
+	username string,
+	duration time.Duration,
+) {
+	token, err := tokenMaker.CreateToken(username, duration)
+	require.NoError(t, err)
+	request.Header.Set("authorization", fmt.Sprintf("Bearer %s", token))
+}
+
 func TestGetAccountAPI(t *testing.T){
 	account := randomAccount()
 	testCases := []struct{
 		name string
 		accountID int64
 		buildStubs func(store *mockdb.MockStore)
+		setupAuth func(t *testing.T, request *http.Request, server *Server)
 		checkResponse func(t *testing.T, recorder *httptest.ResponseRecorder)
 	}{
 		{
@@ -33,6 +47,9 @@ func TestGetAccountAPI(t *testing.T){
 				store.EXPECT().GetAccount(gomock.Any(),gomock.Eq(account.ID)).
 				Times(1).
 				Return(account,nil)
+			},
+			setupAuth: func(t *testing.T, request *http.Request, server *Server) {
+				addAuthorization(t, request, server.tokenMaker, account.Owner, time.Minute)
 			},
 			checkResponse: func(t *testing.T, recorder *httptest.ResponseRecorder){
 				//check the response
@@ -50,6 +67,9 @@ func TestGetAccountAPI(t *testing.T){
 				Times(1).
 				Return(db.Account{}, sql.ErrNoRows)
 			},
+			setupAuth: func(t *testing.T, request *http.Request, server *Server) {
+				addAuthorization(t, request, server.tokenMaker, "anyuser", time.Minute)
+			},
 			checkResponse: func(t *testing.T, recorder *httptest.ResponseRecorder){
 				//check the response
 				require.Equal(t, http.StatusNotFound, recorder.Code)
@@ -65,6 +85,9 @@ func TestGetAccountAPI(t *testing.T){
 				Times(1).
 				Return(db.Account{}, sql.ErrConnDone)
 			},
+			setupAuth: func(t *testing.T, request *http.Request, server *Server) {
+				addAuthorization(t, request, server.tokenMaker, "anyuser", time.Minute)
+			},
 			checkResponse: func(t *testing.T, recorder *httptest.ResponseRecorder){
 				//check the response
 				require.Equal(t, http.StatusInternalServerError, recorder.Code)
@@ -78,6 +101,9 @@ func TestGetAccountAPI(t *testing.T){
 				// build stubs
 				store.EXPECT().GetAccount(gomock.Any(),gomock.Any()).
 				Times(0)
+			},
+			setupAuth: func(t *testing.T, request *http.Request, server *Server) {
+				addAuthorization(t, request, server.tokenMaker, "anyuser", time.Minute)
 			},
 			checkResponse: func(t *testing.T, recorder *httptest.ResponseRecorder){
 				//check the response
@@ -102,6 +128,9 @@ func TestGetAccountAPI(t *testing.T){
 			url := fmt.Sprintf("/accounts/%d",tc.accountID)
 			request,err := http.NewRequest(http.MethodGet, url, nil)
 			require.NoError(t,err)
+			if tc.setupAuth != nil {
+				tc.setupAuth(t, request, server)
+			}
 			server.router.ServeHTTP(recorder,request)
 			tc.checkResponse(t, recorder)
 		})

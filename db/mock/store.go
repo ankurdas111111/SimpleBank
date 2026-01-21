@@ -275,6 +275,21 @@ func (mr *MockStoreMockRecorder) TransferTx(arg0, arg1 interface{}) *gomock.Call
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "TransferTx", reflect.TypeOf((*MockStore)(nil).TransferTx), arg0, arg1)
 }
 
+// TransferTxFX mocks base method.
+func (m *MockStore) TransferTxFX(arg0 context.Context, arg1 db.TransferTxFXParams) (db.TransferTxResult, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "TransferTxFX", arg0, arg1)
+	ret0, _ := ret[0].(db.TransferTxResult)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// TransferTxFX indicates an expected call of TransferTxFX.
+func (mr *MockStoreMockRecorder) TransferTxFX(arg0, arg1 interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "TransferTxFX", reflect.TypeOf((*MockStore)(nil).TransferTxFX), arg0, arg1)
+}
+
 // UpdateAccount mocks base method.
 func (m *MockStore) UpdateAccount(arg0 context.Context, arg1 db.UpdateAccountParams) (db.Account, error) {
 	m.ctrl.T.Helper()

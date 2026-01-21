@@ -1,0 +1,65 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>SimpleBank — Open an account</title>
+    <link rel="stylesheet" href="/styles.css" />
+  </head>
+  <body data-page="signup" data-auth="public">
+    <header class="topbar">
+      <div class="topbar-inner container">
+        <a class="brand" href="/">
+          <div class="brand-mark">SB</div>
+          <div class="brand-text">
+            <div class="brand-name">SimpleBank</div>
+            <div class="brand-sub">Personal Banking</div>
+          </div>
+        </a>
+
+        <nav class="nav">
+          <a class="nav-link" href="/login.html">Sign in</a>
+          <a class="nav-link active" href="/signup.html">Open account</a>
+        </nav>
+      </div>
+    </header>
+
+    <main class="container page auth">
+      <div id="banner" class="banner" hidden></div>
+
+      <section class="card auth-card">
+        <h1 class="h1">Open an account</h1>
+        <p class="muted">Create your profile to get started.</p>
+
+        <form id="signupForm" class="form">
+          <div class="field">
+            <label class="label" for="su_username">Username</label>
+            <input id="su_username" name="username" autocomplete="username" required pattern="[A-Za-z0-9]+" />
+          </div>
+          <div class="field">
+            <label class="label" for="su_password">Password</label>
+            <input id="su_password" name="password" type="password" autocomplete="new-password" required minlength="6" />
+          </div>
+          <div class="field">
+            <label class="label" for="su_fullname">Full name</label>
+            <input id="su_fullname" name="full_name" autocomplete="name" required />
+          </div>
+          <div class="field">
+            <label class="label" for="su_email">Email</label>
+            <input id="su_email" name="email" type="email" autocomplete="email" required />
+          </div>
+          <button class="btn btn-block" type="submit">Create profile</button>
+        </form>
+
+        <div class="auth-footer muted">
+          Already have an account? <a class="link" href="/login.html">Sign in</a>
+        </div>
+      </section>
+    </main>
+
+    <div id="toast" class="toast" hidden></div>
+    <script src="/app.js"></script>
+  </body>
+</html>
+
+
